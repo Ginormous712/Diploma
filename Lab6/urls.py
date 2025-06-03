@@ -11,6 +11,9 @@ urlpatterns = [
     path('accounts/profile/', views.profile_view, name='profile'),
     path('accounts/profile/edit/', views.profile_edit, name='profile_edit'),
     path('tickets/my/', views.my_tickets, name='my_tickets'),
+    path('tickets/download/<int:ticket_id>/', views.download_ticket_pdf, name='download_ticket_pdf'),
+
+
 
 
     # Airlines

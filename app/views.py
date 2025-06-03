@@ -2,12 +2,15 @@ from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Airline, Flight, Airport, Ticket, CrewMember, CrewTeam
-from django.http import HttpResponseRedirect, HttpResponseNotFound
+from django.http import HttpResponseRedirect, HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import CustomUserForm, TicketBookingForm, RegistrationForm, UserProfileForm
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render
+
+from .pdf_util import generate_ticket_pdf
+
 
 def index(request):
     return render(request, 'index.html')
@@ -402,3 +405,13 @@ def book_ticket(request):
 def my_tickets(request):
     tickets = Ticket.objects.filter(user=request.user)
     return render(request, 'profile/my_tickets.html', {'tickets': tickets})
+
+from django.contrib.auth.decorators import login_required
+
+def download_ticket_pdf(request, ticket_id):
+    ticket = Ticket.objects.get(pk=ticket_id)
+    pdf_buffer = generate_ticket_pdf(ticket)
+
+    response = HttpResponse(pdf_buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="ticket_{ticket.id}.pdf"'
+    return response

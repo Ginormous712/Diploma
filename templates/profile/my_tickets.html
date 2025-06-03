@@ -9,6 +9,7 @@
                 {% for ticket in tickets %}
                     <li class="list-group-item">
                         Flight: {{ ticket.flight }}, Seat: {{ ticket.seat_number }}, Issued: {{ ticket.issued_date }}
+                        <a href="{% url 'download_ticket_pdf' ticket.id %}" class="btn btn-sm btn-primary">Download PDF</a>
                     </li>
                 {% endfor %}
             </ul>
