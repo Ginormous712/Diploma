@@ -5,6 +5,14 @@
 
 {% block table %}
     <div class="container mt-4">
+        {% if messages %}
+            <ul class="list-unstyled">
+                {% for message in messages %}
+                    <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
         <table class="table table-bordered">
             <thead class="thead-light">
             <tr>
@@ -13,25 +21,25 @@
                 <th>To</th>
                 <th>Departure</th>
                 <th>Arrival</th>
-                <th>Action</th>
+                <th>Airline</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
             {% for flight in flights %}
-                <tr>
-                    <td>{{ flight.flight_number }}</td>
-                    <td>{{ flight.departure_airport.name }}</td>
-                    <td>{{ flight.arrival_airport.name }}</td>
-                    <td>{{ flight.departure_time|date:"Y-m-d H:i" }}</td>
-                    <td>{{ flight.arrival_time|date:"Y-m-d H:i" }}</td>
-                    <td>
-                        {% if request.user.is_authenticated %}
-                            <a href="{% url 'book_ticket' %}?flight_id={{ flight.id }}" class="btn btn-sm btn-success">Book</a>
-                        {% else %}
-                            <a href="{% url 'login' %}?next={% url 'book_ticket' %}?flight_id={{ flight.id }}" class="btn btn-sm btn-secondary">Login to Book</a>
-                            <a href="{% url 'register' %}" class="btn btn-sm btn-info">Create account</a>
-                        {% endif %}
+                <tr class="flight-row" data-flight-id="{{ flight.id }}">
+                    <td class="flight-row-content">
+                        <div class="d-flex align-items-center">
+                            <strong class="mr-2">{{ flight.flight_number }}</strong>
+                        </div>
                     </td>
+                    <td class="flight-row-content">{{ flight.departure_airport.name }}</td>
+                    <td class="flight-row-content">{{ flight.arrival_airport.name }}</td>
+                    <td class="flight-row-content">{{ flight.departure_time|date:"Y-m-d H:i" }}</td>
+                    <td class="flight-row-content">{{ flight.arrival_time|date:"Y-m-d H:i" }}</td>
+                    <td class="flight-row-content">{{ flight.airline.name }}</td>
+                    <td></td>
+                    <a href="{% url 'book_ticket' %}?flight_id={{ flight.id }}" class="flight-row-button-overlay">Book This Flight</a>
                 </tr>
             {% empty %}
                 <tr>

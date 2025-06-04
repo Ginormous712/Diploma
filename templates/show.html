@@ -1,20 +1,39 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
     <meta charset="UTF-8">
-    <title>{% block title %}{% endblock title %}</title>
+    <title>{% block title %}Airline CRM{% endblock title %}</title>
+
+    {# Bootstrap 4.5.2 CSS #}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    {# Ваш власний CSS #}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    {% block head_extra %}{% endblock %} {# Цей блок залишається для Leaflet CSS #}
+
 </head>
 <body>
-    <div>
-        <a href="/" class="btn btn-primary btn-block">Homepage</a>
-        <h1 class="text-center">{% block header %}{% endblock header %}</h1>
-        <div>{% block table %}{% endblock table %}</div>
-    </div>
+{% include 'navbar.html' %}
 
+<div class="container mt-4">
+    <h1 class="text-center mb-4">{% block header %}{% endblock header %}</h1>
+    <div>{% block table %}{% endblock table %}</div>
+</div>
+
+{# Bootstrap 4.5.2 JS (jQuery, Popper.js, Bootstrap.js) - в кінці body #}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+{# Leaflet JavaScript - в кінці body #}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+{# Leaflet.PolylineDecorator Plugin JS - ДОДАНО #}
+<script src="https://cdn.jsdelivr.net/npm/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.min.js"></script>
+{# Chart.js #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script> {# ДОДАНО #}
+
+{% block extra_js %}{% endblock %} {# Це блок для вашого власного JS #}
 </body>
 </html>

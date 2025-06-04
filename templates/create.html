@@ -1,47 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <meta charset="UTF-8">
-    <title>{% block title %}{% endblock title %}</title>
-</head>
-<body>
-<h1>{% block header %}{% endblock header %}</h1>
+{% extends "show.html" %} {# ЦЕЙ РЯДОК МАЄ БУТИ ПЕРШИМ І ЄДИНИМ ТАКОГО ТИПУ #}
+{% load static %}
 
-<form method="post">
-    {% csrf_token %}
-    {% block form %}{% endblock form %}
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+{% block title %}{{ block.super }} - {% block create_title %}{% endblock create_title %}{% endblock title %}
+{% block header %}{% block create_header %}{% endblock create_header %}{% endblock header %}
 
-<!-- Toast messages -->
-{% if messages %}
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
-        {% for message in messages %}
-            <div class="toast align-items-center text-white bg-{{ message.tags }} border-0 show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        {{ message }}
+{% block table %} {# Весь вміст, що стосується форми, має бути тут #}
+    <div class="container mt-4">
+        <h1>{% block create_header_form %}{% endblock create_header_form %}</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            {% block form %}{% endblock form %}
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+
+        {% if messages %}
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+                {% for message in messages %}
+                    <div class="toast align-items-center text-white bg-{{ message.tags }} border-0 show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                {{ message }}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
+                {% endfor %}
             </div>
-        {% endfor %}
+        {% endif %}
     </div>
-{% endif %}
 
-<!-- Bootstrap Toast JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-        toastElList.forEach(function (toastEl) {
-            var toast = new bootstrap.Toast(toastEl, { delay: 3000 })
-            toast.show()
-        })
-    });
-</script>
+    {# Скрипт для тостів (якщо потрібен) #}
+    {# Для Bootstrap 4 тостів: вони вимагають jQuery і певної структури/ініціалізації. #}
+    {# Цей скрипт для Bootstrap 5. Для Bootstrap 4, це може бути: #}
+    {# <script> #}
+    {#     $(document).ready(function() { #}
+    {#         $('.toast').toast({delay: 3000}); #}
+    {#         $('.toast').toast('show'); #}
+    {#     }); #}
+    {# </script> #}
+    {# Якщо ви не хочете тости, або хочете, щоб вони працювали з Bootstrap 4, то цей скрипт потрібно адаптувати. #}
+    {# Залишимо його поки що, якщо він не викликає JS-помилок, хоча він для B5 API #}
+    {# Можливо, краще видалити цей скрипт, якщо тости не є критичними, або він не працює. #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+            toastElList.forEach(function (toastEl) {
+                // Це Bootstrap 5 API, для B4 потрібно $("#myToast").toast('show')
+                // Якщо тости не працюють, це потрібно адаптувати до Bootstrap 4 API
+                if (typeof bootstrap !== 'undefined' && bootstrap.Toast) { // Це все ще Bootstrap 5 перевірка
+                    var toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                    toast.show();
+                } else {
+                    console.warn("Bootstrap Toast (v5 API) not available. Toast message might not show.");
+                }
+            })
+        });
+    </script>
+{% endblock table %}
 
 {% block extra_js %}{% endblock %}
-</body>
-</html>

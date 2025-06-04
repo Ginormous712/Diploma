@@ -1,0 +1,23 @@
+{# templates/import_form.html #}
+{% extends 'create.html' %}
+{% block title %}Import {{ model_name }}{% endblock title %}
+{% block header %}Import Data for {{ model_name }}{% endblock header %}
+{% block form %}
+    <form method="post" enctype="multipart/form-data" action="{{ import_url }}">
+        <div class="form-group">
+            <label for="fileInput">Choose CSV or Excel file to upload</label>
+            <input type="file" class="form-control-file" id="fileInput" name="file" required accept=".csv, .xlsx">
+        </div>
+        <p class="text-muted mt-3">
+            Please ensure your file has the following columns for {{ model_name }}:
+            {% if model_name == 'Airlines' %}Name, Country, Contact Info{% endif %}
+            {% if model_name == 'Airports' %}Name, Code, Location, Contact Info, Latitude, Longitude{% endif %}
+            {% if model_name == 'Flights' %}Flight Number, Departure Time, Arrival Time, Status, Airline ID, Departure Airport ID, Arrival Airport ID{% endif %}
+            {% if model_name == 'Tickets' %}User ID, Flight ID, Seat Number{% endif %}
+            {% if model_name == 'Users' %}Username, Email, Role, First Name, Last Name{% endif %}
+            {% if model_name == 'Crew Members' %}First Name, Last Name, Position, Qualification, Contact Info{% endif %}
+            {% if model_name == 'Crew Teams' %}Flight ID, Member IDs{% endif %}
+            For updates, use the primary key column (e.g., 'Name' for Airlines, 'Code' for Airports, 'Flight Number' for Flights) to match existing records.
+        </p>
+    </form>
+{% endblock form %}

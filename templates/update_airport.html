@@ -15,6 +15,14 @@
         <input id="inputLocation" type="text" class="form-control" name="location" value="{{ airport.location }}" required>
     </div>
     <div class="form-group">
+        <label for="inputLatitude">Latitude</label> {# ДОДАНО #}
+        <input id="inputLatitude" type="number" step="any" class="form-control" name="latitude" value="{{ airport.latitude }}"> {# ДОДАНО #}
+    </div>
+    <div class="form-group">
+        <label for="inputLongitude">Longitude</label> {# ДОДАНО #}
+        <input id="inputLongitude" type="number" step="any" class="form-control" name="longitude" value="{{ airport.longitude }}"> {# ДОДАНО #}
+    </div>
+    <div class="form-group">
         <label for="inputContact">Contact Info</label>
         <textarea id="inputContact" class="form-control" name="contact_info" rows="3" required>{{ airport.contact_info }}</textarea>
     </div>

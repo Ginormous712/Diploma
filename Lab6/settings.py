@@ -123,9 +123,43 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / 'app' / 'static',
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'app.User'
+
+# URL to redirect to after logging out
+LOGOUT_REDIRECT_URL = '/'
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'app.apps.AppConfig',
+    'rest_framework',
+    'drf_spectacular',
+]
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Airline CRM API',
+    'DESCRIPTION': 'API for Airline CRM system management and booking.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False, # Якщо True, схема доступна за /api/schema/, інакше тільки UI
+    # 'SERVE_URLCONF': 'Lab6.urls', # За замовчуванням використовує ROOT_URLCONF
+    # 'CONTACT': {'name': 'Your Name', 'email': 'your.email@example.com'},
+    # 'LICENSE': {'name': 'BSD License', 'url': 'https://opensource.org/licenses/BSD-3-Clause'},
+}
+
+# REST_FRAMEWORK settings (якщо їх немає, додайте)
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}

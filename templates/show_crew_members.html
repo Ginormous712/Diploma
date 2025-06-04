@@ -29,4 +29,9 @@
         {% endfor %}
     </table>
     <a href="{% url 'create_crew_member' %}" class="btn btn-success btn-block">Create new</a>
+    <div class="mt-3">
+        <a href="{% url 'export_crew_members_csv' %}" class="btn btn-info mr-2">Export to CSV</a>
+        <a href="{% url 'export_crew_members_excel' %}" class="btn btn-info mr-2">Export to Excel</a>
+        <a href="{% url 'import_crew_members' %}" class="btn btn-primary">Import Flights</a>
+    </div>
 {% endblock table %}

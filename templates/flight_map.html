@@ -1,0 +1,182 @@
+{# templates/flight_map.html #}
+{% extends 'show.html' %}
+{% load static %}
+
+{% block title %}Flight Map{% endblock %}
+{% block header %}Interactive Flight Map{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        /* Стилі для підсвічування лінії при наведенні */
+        .leaflet-interactive:hover {
+            stroke-width: 8 !important; /* Трохи товще при наведенні */
+            stroke: blue !important; /* Синій колір */
+            cursor: pointer;
+        }
+        #mapid {
+            box-sizing: border-box;
+        }
+    </style>
+{% endblock %}
+
+{% block table %}
+    <div class="container mt-4">
+        <div id="mapid" style="height: 600px; width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {# Leaflet JavaScript та PolylineDecorator вже підключені в show.html #}
+
+    <script>
+        $(document).ready(function() {
+            console.log("Document ready. Initializing map for flight_map.html.");
+            if (typeof L === 'undefined' || $('#mapid').length === 0) {
+                console.error("Leaflet.js not loaded or map container #mapid not found. Cannot initialize map.");
+                $('#mapid').text("Map could not be loaded. Please try again later or check your internet connection.");
+                return;
+            }
+
+            var map = L.map('mapid').setView([0, 0], 2);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Створюємо спеціальну панель для ліній, щоб керувати їх Z-індексом
+            if (!map.getPane('routesPane')) {
+                map.createPane('routesPane');
+                map.getPane('routesPane').style.zIndex = 500; // Вищий z-index
+                console.log("Created 'routesPane' with z-index 500.");
+            }
+
+            // --- ВИДАЛЕНО: Тестова пурпурова лінія ---
+
+
+            var airportMarkers = {};
+            var allMapFeatures = L.featureGroup(); // Для збору всіх елементів (маркерів та ліній) для fitBounds
+
+            $.ajax({
+                url: "{% url 'api_map_data' %}",
+                type: "GET",
+                success: function(data) {
+                    console.log("API data received successfully for map:", data);
+                    var airports = data.airports;
+                    var flights = data.flights;
+
+                    console.log("Airports received for processing:", airports);
+                    console.log("Flights received for processing:", flights);
+
+                    // Додаємо маркери аеропортів
+                    airports.forEach(function(airport) {
+                        if (airport.latitude && airport.longitude && airport.latitude !== 0.0 && airport.longitude !== 0.0) {
+                            var marker = L.marker([airport.latitude, airport.longitude]).addTo(map)
+                                .bindPopup('<b>' + airport.name + ' (' + airport.code + ')</b><br>' + airport.location + '<br>Flights: ' + flights.filter(f => f.departure_airport.id === airport.id || f.arrival_airport.id === airport.id).length);
+                            airportMarkers[airport.id] = marker;
+                            allMapFeatures.addLayer(marker);
+                            console.log("Marker added for airport:", airport.name, "at", airport.latitude, airport.longitude);
+                        } else {
+                            console.warn("Airport " + airport.name + " has invalid coordinates, cannot add marker:", airport.latitude, airport.longitude);
+                        }
+                    });
+
+                    console.log("Attempting to draw flight routes (flights loop starts)...");
+                    if (flights.length === 0) {
+                        console.info("No flights available in API data to draw routes.");
+                    }
+
+                    flights.forEach(function(flight) {
+                        var depAirport = flight.departure_airport;
+                        var arrAirport = flight.arrival_airport;
+
+                        console.log("Processing flight:", flight.flight_number);
+                        console.log("  Departure Airport (from flight object):", depAirport ? depAirport.name + " (" + depAirport.latitude + "," + depAirport.longitude + ")" : "N/A");
+                        console.log("  Arrival Airport (from flight object):", arrAirport ? arrAirport.name + " (" + arrAirport.latitude + "," + arrAirport.longitude + ")" : "N/A");
+
+                        if (depAirport && arrAirport &&
+                            depAirport.latitude && depAirport.longitude && depAirport.latitude !== 0.0 && depAirport.longitude !== 0.0 &&
+                            arrAirport.latitude && arrAirport.longitude && arrAirport.latitude !== 0.0 && arrAirport.longitude !== 0.0) {
+
+                            var latlngs = [
+                                [depAirport.latitude, depAirport.longitude],
+                                [arrAirport.latitude, arrAirport.longitude]
+                            ];
+                            console.log("  Attempting to draw polyline with coords (from flight object data):", latlngs);
+
+                            // ЗМІНЕНО: Колір на ЧЕРВОНИЙ, товщина 4, повна непрозорість
+                            var polyline = L.polyline(latlngs, {
+                                color: 'red', // Змінено на червоний
+                                weight: 4,     // Зменшено товщину
+                                opacity: 1.0,   // Повна непрозорість
+                                lineCap: 'round',
+                                pane: 'routesPane'
+                            }).addTo(map);
+
+                            // ДОДАНО: Стрілочки за допомогою PolylineDecorator
+                            var decorator = L.polylineDecorator(polyline, {
+                                patterns: [
+                                    {offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({
+                                            pixelSize: 10,  // Розмір стрілки
+                                            polygon: true,  // Залита стрілка
+                                            pathOptions: { fillOpacity: 1, weight: 0, color: 'red', fillColor: 'red' } // Колір стрілки
+                                        })}
+                                ]
+                            }).addTo(map);
+
+                            allMapFeatures.addLayer(polyline);
+                            polyline.bringToFront();
+
+                            console.log("  Polyline added to map from flight object data. Path:", polyline.getLatLngs());
+
+                            polyline.bindPopup('<b>Flight: ' + flight.flight_number + '</b><br>' +
+                                'From: ' + depAirport.name + ' (' + depAirport.code + ')<br>' +
+                                'To: ' + arrAirport.name + ' (' + arrAirport.code + ')<br>' +
+                                'Departure: ' + new Date(flight.departure_time).toLocaleString() + '<br>' +
+                                'Arrival: ' + new Date(flight.arrival_time).toLocaleString() + '<br>' +
+                                'Status: ' + flight.status);
+
+                            // Обробники подій для наведення на лінію
+                            polyline.on('mouseover', function() {
+                                polyline.setStyle({color: 'blue', weight: 8, opacity: 1.0}); // Збільшена товщина при наведенні
+                                decorator.setPatterns([ // Змінюємо колір стрілки при наведенні
+                                    {offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: 10, polygon: true, pathOptions: { fillOpacity: 1, weight: 0, color: 'blue', fillColor: 'blue' }})}
+                                ]);
+                            });
+                            polyline.on('mouseout', function() {
+                                polyline.setStyle({color: 'red', weight: 4, opacity: 1.0}); // Повернення
+                                decorator.setPatterns([ // Повертаємо колір стрілки
+                                    {offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: 10, polygon: true, pathOptions: { fillOpacity: 1, weight: 0, color: 'red', fillColor: 'red' }})}
+                                ]);
+                            });
+
+                        } else {
+                            console.warn("Flight " + flight.flight_number + " skipped. Invalid airport data for route drawing. Dep:", depAirport ? depAirport.name + " (" + depAirport.latitude + "," + depAirport.longitude + ")" : "N/A", "Arr:", arrAirport ? arrAirport.name + " (" + arrAirport.latitude + "," + arrAirport.longitude + ")" : "N/A");
+                        }
+                    });
+                    console.log("Finished drawing flight routes (flights loop ends).");
+
+                    // Підганяємо мапу під всі маркери ТА ЛІНІЇ
+                    if (allMapFeatures.getLayers().length > 0) {
+                        var bounds = allMapFeatures.getBounds();
+                        if (bounds.isValid()) {
+                            map.fitBounds(bounds, {padding: [50, 50]});
+                            console.log("Map fitted to features: Bounds are valid.");
+                        } else {
+                            console.warn("Bounds are not valid for all features. Setting default view to Europe.");
+                            map.setView([48.0, 10.0], 5);
+                        }
+                    } else {
+                        console.info("No valid map features (markers or routes) to display. Setting default view.");
+                        map.setView([0, 0], 2);
+                    }
+
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error fetching map data:", status, error);
+                    $('#mapid').text("Error loading flight data. Please check console for details.");
+                }
+            });
+        });
+    </script>
+{% endblock %}

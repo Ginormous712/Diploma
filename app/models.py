@@ -19,6 +19,8 @@ class Airport(models.Model):
     code = models.CharField(max_length=10)  # IATA/ICAO
     location = models.CharField(max_length=255)
     contact_info = models.TextField()
+    latitude = models.FloatField(null=True, blank=True)  # Додаємо поле широти
+    longitude = models.FloatField(null=True, blank=True) # Додаємо поле довготи
 
     class Meta:
         db_table = 'airport'

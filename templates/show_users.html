@@ -27,4 +27,9 @@
         </tbody>
     </table>
     <a href="{% url 'create_user' %}" class="btn btn-success btn-block">Create New User</a>
+    <div class="mt-3">
+        <a href="{% url 'export_users_csv' %}" class="btn btn-info mr-2">Export to CSV</a>
+        <a href="{% url 'export_users_excel' %}" class="btn btn-info mr-2">Export to Excel</a>
+        <a href="{% url 'import_users' %}" class="btn btn-primary">Import Flights</a>
+    </div>
 {% endblock %}

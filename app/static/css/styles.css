@@ -1,0 +1,126 @@
+/* app/static/css/styles.css */
+
+/* Стилі для фіксованого навбару */
+body {
+    padding-top: 56px;
+}
+
+/* Стилі для рядка таблиці рейсів (для головної сторінки) */
+/* Ці стилі залишаються, оскільки вони працюють для index.html */
+.flight-row {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.flight-row td {
+    vertical-align: middle;
+    padding: 0;
+}
+
+.flight-row-content {
+    transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: .75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.flight-row-button-overlay {
+    opacity: 0;
+    position: absolute; /* Позиціонується відносно TR */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: opacity 0.3s ease-in-out;
+    color: black;
+    font-size: 1.25rem;
+    text-decoration: none;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.flight-row:hover .flight-row-content {
+    opacity: 0.2;
+    filter: blur(2px);
+}
+.flight-row:hover .flight-row-button-overlay {
+    opacity: 1;
+}
+
+/* --- НОВІ/МОДИФІКОВАНІ СТИЛІ ДЛЯ ТАБЛИЦІ КВИТКІВ (my_tickets.html) --- */
+
+.ticket-row {
+    position: relative; /* TR є позиціонуючим контекстом для оверлея */
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.ticket-row td {
+    vertical-align: middle;
+    padding: 0;
+}
+
+.ticket-row-content {
+    transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: .75rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* ОСОБЛИВО: Стилі для клітинки, що містить оверлей (без display:none) */
+.ticket-overlay-cell {
+    /* Ця клітинка тепер має бути позиціонована відносно вікна перегляду
+       або мати властивості, що дозволяють оверлею розтягуватися з неї */
+    /* position: relative; - Якщо оверлей позиціонуватиметься відносно неї */
+    /* width: auto; - Залиште за замовчуванням */
+}
+
+/* Стилі для кнопки-оверлея на таблиці квитків */
+.ticket-row-button-overlay {
+    opacity: 0; /* Спочатку невидимий */
+    /* JS буде встановлювати position: absolute, top, left, width, height */
+    display: flex; /* Flexbox для центрування тексту */
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: opacity 0.3s ease-in-out;
+    color: black;
+    font-size: 1.25rem;
+    text-decoration: none;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Ефекти при наведенні на рядок квитків */
+.ticket-row:hover .ticket-row-content {
+    opacity: 0.2;
+    filter: blur(2px);
+}
+.ticket-row:hover .ticket-row-button-overlay {
+    opacity: 1;
+}
+
+/* Видаляємо всі правила, що приховували останні колонки */
+/*
+.table thead th:nth-last-child(1) {
+    display: none;
+}
+.table tbody td:nth-last-child(1) {
+    display: none;
+}
+*/

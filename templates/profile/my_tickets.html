@@ -1,20 +1,86 @@
 {% extends 'show.html' %}
+{% load static %}
 
 {% block title %}My Tickets{% endblock %}
 {% block header %}My Booked Tickets{% endblock %}
 {% block table %}
     <div class="container mt-4">
         {% if tickets %}
-            <ul class="list-group">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                <tr>
+                    <th>Flight #</th>
+                    <th>Flight From</th>
+                    <th>Flight To</th>
+                    <th>Departure Date</th>
+                    <th>Arrival Date</th>
+                    <th>Seat</th>
+                    <th></th> {# Порожній TH для останньої колонки #}
+                </tr>
+                </thead>
+                <tbody>
                 {% for ticket in tickets %}
-                    <li class="list-group-item">
-                        Flight: {{ ticket.flight }}, Seat: {{ ticket.seat_number }}, Issued: {{ ticket.issued_date }}
-                        <a href="{% url 'download_ticket_pdf' ticket.id %}" class="btn btn-sm btn-primary">Download PDF</a>
-                    </li>
+                    <tr class="ticket-row" data-ticket-id="{{ ticket.id }}">
+                        <td><div class="ticket-row-content">{{ ticket.flight.flight_number }}</div></td>
+                        <td><div class="ticket-row-content">{{ ticket.flight.departure_airport.name }}</div></td>
+                        <td><div class="ticket-row-content">{{ ticket.flight.arrival_airport.name }}</div></td>
+                        <td><div class="ticket-row-content">{{ ticket.flight.departure_time|date:"Y-m-d H:i" }}</div></td>
+                        <td><div class="ticket-row-content">{{ ticket.flight.arrival_time|date:"Y-m-d H:i" }}</div></td>
+                        <td><div class="ticket-row-content">{{ ticket.seat_number }}</div></td>
+
+                        {# ОСТАННЯ TD: ТУТ БУДЕ РОЗМІЩЕНИЙ ОВЕРЛЕЙ #}
+                        <td class="ticket-overlay-cell">
+                            {# Оверлей з посиланням - тепер він всередині TD #}
+                            <a href="{% url 'download_ticket_pdf' ticket.id %}" class="ticket-row-button-overlay">Download PDF</a>
+                        </td>
+                    </tr>
                 {% endfor %}
-            </ul>
+                </tbody>
+            </table>
         {% else %}
             <p>No tickets booked yet.</p>
         {% endif %}
     </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        $(document).ready(function() {
+            $('.ticket-row').each(function() {
+                var $row = $(this); // Поточний рядок TR
+                var $overlayCell = $row.find('.ticket-overlay-cell'); // Знаходимо клітинку для оверлея
+                var $overlayLink = $overlayCell.find('.ticket-row-button-overlay'); // Знаходимо сам оверлей-лінк
+
+                // Встановлюємо розмір та позицію оверлея, щоб він покривав весь рядок
+                // Це потрібно, тому що оверлей знаходиться всередині TD, а не TR
+                var rowPosition = $row.position();
+                var rowWidth = $row.width();
+                var rowHeight = $row.height();
+
+                $overlayLink.css({
+                    'position': 'absolute',
+                    'top': rowPosition.top,
+                    'left': rowPosition.left,
+                    'width': rowWidth,
+                    'height': rowHeight
+                });
+
+                // Оновлюємо позицію при зміні розміру вікна
+                $(window).resize(function() {
+                    var newRowPosition = $row.position();
+                    var newRowWidth = $row.width();
+                    var newRowHeight = $row.height();
+                    $overlayLink.css({
+                        'top': newRowPosition.top,
+                        'left': newRowPosition.left,
+                        'width': newRowWidth,
+                        'height': newRowHeight
+                    });
+                });
+            });
+
+            // CSS-стилі вже керують opacity та blur при наведенні.
+            // Клацання на оверлей автоматично перенаправляє за його href.
+        });
+    </script>
 {% endblock %}

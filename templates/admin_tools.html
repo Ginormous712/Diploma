@@ -1,0 +1,129 @@
+{# templates/admin_tools.html #}
+{% extends 'show.html' %}
+{% load static %}
+
+{% block title %}Admin Tools{% endblock %}
+{% block header %}Data Management Tools{% endblock %}
+
+{% block table %}
+    <div class="container mt-4">
+        <h2>Import/Export Data</h2>
+        <p class="mb-4">Here you can manage data for different models via CSV/Excel import and export.</p>
+
+        {# Секція для Airlines #}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Airlines</h4>
+            </div>
+            <div class="card-body">
+                <p>Manage Airline records (Name, Country, Contact Info).</p>
+                <div class="btn-group" role="group" aria-label="Airline Import/Export">
+                    <a href="{% url 'export_airlines_csv' %}" class="btn btn-info mr-2">Export CSV</a>
+                    <a href="{% url 'export_airlines_excel' %}" class="btn btn-info mr-2">Export Excel</a>
+                    <a href="{% url 'import_airlines' %}" class="btn btn-primary">Import CSV/Excel</a>
+                </div>
+            </div>
+        </div>
+
+        {# Секція для Airports #}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Airports</h4>
+            </div>
+            <div class="card-body">
+                <p>Manage Airport records (Name, Code, Location, Contact Info, Coordinates).</p>
+                <div class="btn-group" role="group" aria-label="Airport Import/Export">
+                    <a href="{% url 'export_airports_csv' %}" class="btn btn-info mr-2">Export CSV</a>
+                    <a href="{% url 'export_airports_excel' %}" class="btn btn-info mr-2">Export Excel</a>
+                    <a href="{% url 'import_airports' %}" class="btn btn-primary">Import CSV/Excel</a>
+                </div>
+            </div>
+        </div>
+
+        {# Секція для Flights #}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Flights</h4>
+            </div>
+            <div class="card-body">
+                <p>Manage Flight records (Flight Number, Times, Status, Airports, Airline).</p>
+                <div class="btn-group" role="group" aria-label="Flight Import/Export">
+                    <a href="{% url 'export_flights_csv' %}" class="btn btn-info mr-2">Export CSV</a>
+                    <a href="{% url 'export_flights_excel' %}" class="btn btn-info mr-2">Export Excel</a>
+                    <a href="{% url 'import_flights' %}" class="btn btn-primary">Import CSV/Excel</a>
+                </div>
+            </div>
+        </div>
+
+        {# Секція для Tickets #}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Tickets</h4>
+            </div>
+            <div class="card-body">
+                <p>Manage Ticket records (User, Flight, Seat Number, Issued Date).</p>
+                <div class="btn-group" role="group" aria-label="Ticket Import/Export">
+                    <a href="{% url 'export_tickets_csv' %}" class="btn btn-info mr-2">Export CSV</a>
+                    <a href="{% url 'export_tickets_excel' %}" class="btn btn-info mr-2">Export Excel</a>
+                    <a href="{% url 'import_tickets' %}" class="btn btn-primary">Import CSV/Excel</a>
+                </div>
+            </div>
+        </div>
+
+        {# Секція для Users #}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Users</h4>
+            </div>
+            <div class="card-body">
+                <p>Manage User records (Username, Email, Role, Names).</p>
+                <div class="btn-group" role="group" aria-label="User Import/Export">
+                    <a href="{% url 'export_users_csv' %}" class="btn btn-info mr-2">Export CSV</a>
+                    <a href="{% url 'export_users_excel' %}" class="btn btn-info mr-2">Export Excel</a>
+                    <a href="{% url 'import_users' %}" class="btn btn-primary">Import CSV/Excel</a>
+                </div>
+            </div>
+        </div>
+
+        {# Секція для Crew Members #}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Crew Members</h4>
+            </div>
+            <div class="card-body">
+                <p>Manage Crew Member records (Names, Position, Qualification, Contact Info).</p>
+                <div class="btn-group" role="group" aria-label="Crew Member Import/Export">
+                    <a href="{% url 'export_crew_members_csv' %}" class="btn btn-info mr-2">Export CSV</a>
+                    <a href="{% url 'export_crew_members_excel' %}" class="btn btn-info mr-2">Export Excel</a>
+                    <a href="{% url 'import_crew_members' %}" class="btn btn-primary">Import CSV/Excel</a>
+                </div>
+            </div>
+        </div>
+
+        {# Секція для Crew Teams #}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Crew Teams</h4>
+            </div>
+            <div class="card-body">
+                <p>Manage Crew Team records (Flight, Members).</p>
+                <div class="btn-group" role="group" aria-label="Crew Team Import/Export">
+                    <a href="{% url 'export_crew_teams_csv' %}" class="btn btn-info mr-2">Export CSV</a>
+                    <a href="{% url 'export_crew_teams_excel' %}" class="btn btn-info mr-2">Export Excel</a>
+                    <a href="{% url 'import_crew_teams' %}" class="btn btn-primary">Import CSV/Excel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>System Reports & Statistics</h4>
+            </div>
+            <div class="card-body">
+                <p>View aggregated data and trends for system usage and bookings.</p>
+                <a href="{% url 'statistics_view' %}" class="btn btn-info">View Statistics</a> {# ДОДАНО #}
+            </div>
+        </div>
+
+    </div>
+{% endblock table %}

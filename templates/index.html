@@ -1,25 +1,144 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    {# Ключові підключення JS в HEAD #}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <meta charset="UTF-8">
     <title>Homepage</title>
 </head>
-<body class="container mt-4">
+<body>
+{% include 'navbar.html' %}
+
+<div class="container mt-4">
     <h1 class="mb-4">Welcome to the Airline Management System</h1>
 
-    <div class="btn-group-vertical">
-        <a href="/show_airlines" class="btn btn-info mb-2">Show Airlines</a>
-        <a href="/show_flights" class="btn btn-info mb-2">Show Flights</a>
-        <a href="/show_airports" class="btn btn-info mb-2">Show Airports</a>
-        <a href="/show_tickets" class="btn btn-info mb-2">Show Tickets</a>
-        <a href="/show_users" class="btn btn-info mb-2">Show Users</a>
-        <a href="/show_crew_members" class="btn btn-info mb-2">Show Crew Members</a>
-        <a href="/show_crew_teams/" class="btn btn-info mb-2">Show Crew Teams</a>
-        <a href="{% url 'public_flights' %}" class="btn btn-primary">View Available Flights</a>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Flight Search</h3>
+        </div>
+        <div class="card-body">
+            <form id="flight-search-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="query">Departure/Arrival City or Airport Code/Flight Number</label>
+                    <input type="text" class="form-control" id="query" name="query" placeholder="e.g., Kyiv, KBP, PS701">
+                </div>
+                <div class="form-group">
+                    <label for="flight_date">Date of Flight</label>
+                    <input type="date" class="form-control" id="flight_date" name="flight_date">
+                </div>
+                <button type="submit" class="btn btn-primary">Search Flights</button>
+            </form>
+        </div>
     </div>
+
+    <div id="flight-results" class="mt-4">
+        <h3 class="mb-3">Available Flights</h3>
+        <table class="table table-bordered">
+            <thead class="thead-light">
+            <tr>
+                <th>Flight Number</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Departure</th>
+                <th>Arrival</th>
+                <th>Airline</th>
+            </tr>
+            </thead>
+            <tbody id="flight-results-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        const isAuthenticated = "{{ request.user.is_authenticated|lower }}" === "true";
+        const loginUrl = "{% url 'login' %}";
+        const bookTicketUrlBase = "{% url 'book_ticket' %}";
+
+        function fetchAndDisplayFlights(query = '', flight_date = '') {
+            $.ajax({
+                url: "{% url 'api_flight_search' %}",
+                type: "GET",
+                data: {
+                    query: query,
+                    flight_date: flight_date
+                },
+                success: function(data) {
+                    let tableBody = $('#flight-results-body');
+                    tableBody.empty();
+
+                    if (data.length > 0) {
+                        $.each(data, function(index, flight) {
+                            let departureTime = new Date(flight.departure_time).toLocaleString('uk-UA', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                            let arrivalTime = new Date(flight.arrival_time).toLocaleString('uk-UA', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+                            let bookButtonText = "Book Ticket";
+                            let bookButtonHref;
+
+                            if (!isAuthenticated) {
+                                bookButtonText = "Login to Book";
+                                bookButtonHref = `${loginUrl}?next=${encodeURIComponent(bookTicketUrlBase + '?flight_id=' + flight.id)}`;
+                            } else {
+                                bookButtonHref = `${bookTicketUrlBase}?flight_id=${flight.id}`;
+                            }
+
+                            let row = $('<tr class="flight-row"></tr>');
+                            row.attr('data-flight-id', flight.id);
+
+                            row.append(`<td><div class="flight-row-content"><strong class="mr-2">${flight.flight_number}</strong></div></td>`);
+                            row.append(`<td><div class="flight-row-content">${flight.departure_airport.name} (${flight.departure_airport.code})</div></td>`);
+                            row.append(`<td><div class="flight-row-content">${flight.arrival_airport.name} (${flight.arrival_airport.code})</div></td>`);
+                            row.append(`<td><div class="flight-row-content">${departureTime}</div></td>`);
+                            row.append(`<td><div class="flight-row-content">${arrivalTime}</div></td>`);
+                            row.append(`<td><div class="flight-row-content">${flight.airline.name}</div></td>`);
+
+                            let overlayLink = $(`<a href="${bookButtonHref}" class="flight-row-button-overlay">${bookButtonText}</a>`);
+                            row.append(overlayLink);
+
+                            tableBody.append(row);
+                        });
+                    } else {
+                        tableBody.append('<tr><td colspan="6" class="text-center">No flights found.</td></tr>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error: ", status, error);
+                    $('#flight-results-body').empty().append('<tr><td colspan="6" class="text-center text-danger">Error loading flights. Please try again.</td></tr>');
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        alert(xhr.responseJSON.error);
+                    }
+                }
+            });
+        }
+
+        $('#flight-search-form').submit(function(e) {
+            e.preventDefault();
+            let query = $('#query').val();
+            let flight_date = $('#flight_date').val();
+            fetchAndDisplayFlights(query, flight_date);
+        });
+
+        let debounceTimer;
+        $('#query, #flight_date').on('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                let query = $('#query').val();
+                let flight_date = $('#flight_date').val();
+                fetchAndDisplayFlights(query, flight_date);
+            }, 300);
+        });
+
+        fetchAndDisplayFlights();
+    });
+</script>
 </body>
 </html>
